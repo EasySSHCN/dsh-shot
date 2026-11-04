@@ -4,84 +4,84 @@
 
 # dsh-shot
 
-[中文](README.zh.md) | English
+中文 | [English](README.en.md)
 
-**Screenshot capture for DeepSeek Harness (DSH).** Press a global hotkey, click the camera button in the composer, or type `/shot` — a full-screen overlay lets you drag a region, and the captured PNG lands in the current conversation as a draft attachment. The agent can also call a `screenshot` tool to look at your screen on request.
+**DeepSeek Harness（DSH）截图插件。** 全局快捷键、输入框相机按钮或 `/shot` 命令三种方式触发：全屏覆盖层拖框选区，截图直接进入当前对话的输入框草稿。智能体也能通过 `screenshot` 工具在你要求时主动查看屏幕。
 
-## Features
+## 功能
 
-- **Global hotkey** (default `Ctrl+Alt+A`) works system-wide, even when the browser is not focused
-- **Camera button** in the conversation composer triggers capture directly — the shot is inserted into the input draft, press Enter to send
-- **`/shot` slash command** with an optional region: `/shot 100,100,800,600`
-- **`screenshot` agent tool** — the model can capture your screen (`region` with drag overlay by default, or `screen` for the whole desktop) when you ask it to look at something
-- **Translate / OCR actions** in the hotkey flow attach a preset caption ("translate the text in this screenshot" / "extract all text") automatically
-- **Copy to clipboard** mode captures without touching any session
-- Never auto-submits: captured images always wait in the draft until **you** press Enter
+- **全局快捷键**（默认 `Ctrl+Alt+A`），浏览器没聚焦也能用
+- **输入框相机按钮**：点击直接触发截图，截图进入输入框草稿，回车即发送
+- **`/shot` 命令**：可带区域参数，如 `/shot 100,100,800,600`
+- **`screenshot` 智能体工具**：你说"看看我的屏幕/这个报错弹窗"时，模型可以自己截屏（默认弹覆盖层拖框，也可整屏直截）
+- **翻译 / OCR 动作**：快捷键流程里选择后自动附上预设说明（"翻译这张截图里的文字"/"提取全部文字"）
+- **仅复制到剪贴板**模式：截图不进任何会话
+- **绝不自动发送**：截图永远等你亲自按回车
 
-## Requirements
+## 环境要求
 
-- Windows 10/11 (capture runs through a PowerShell + WinForms overlay; other platforms are not supported yet)
-- DSH: **tested on `0.2.2-rc.1`**; `0.2.1+` declared in `engines` (requires the client-modules web plugin loader). Older or unreleased builds may differ.
-- No external dependencies, no compiled binaries: the overlay window is compiled in-process via PowerShell `Add-Type`, which also avoids "fresh unsigned binary" antivirus heuristics
+- Windows 10/11（截图通过 PowerShell + WinForms 覆盖层实现，暂不支持其他系统）
+- DSH：**已在 `0.2.2-rc.1` 上实测**；声明兼容 `0.2.1+`（`engines` 字段，依赖 client-modules 网页端插件加载器）。更旧或未发布的版本行为可能不同。
+- 零外部依赖、无编译产物：覆盖层窗口由 PowerShell `Add-Type` 进程内编译，天然避开"来路不明的新二进制"杀软误报
 
-## Install
+## 安装
 
-Install from npm with the DSH CLI:
-
-```sh
-dsh plugin --profile <your-profile> add dsh-shot
-```
-
-To install a local copy or a GitHub tarball instead:
+用 DSH CLI 从 npm 安装：
 
 ```sh
-# local directory
-dsh plugin --profile <your-profile> add file:/path/to/dsh-shot-plugin
-
-# tarball (npm-style URL)
-dsh plugin --profile <your-profile> add https://github.com/<owner>/<repo>/archive/refs/tags/v0.1.1.tar.gz
+dsh plugin --profile <你的profile> add dsh-shot
 ```
 
-In DSH Desktop, use the in-app plugin manager (Settings → Plugins) and search for `dsh-shot`. Restart the session page after installing if the camera button does not appear.
+也可以从本地目录或 GitHub tarball 安装：
 
-## Usage
+```sh
+# 本地目录
+dsh plugin --profile <你的profile> add file:/path/to/dsh-shot-plugin
 
-| Action | Result |
+# tarball（npm 风格 URL）
+dsh plugin --profile <你的profile> add https://github.com/EasySSHCN/dsh-shot/releases/download/v0.1.1/dsh-shot-0.1.1.tgz
+```
+
+DSH Desktop 用户在应用内 **设置 → 插件** 搜索 `dsh-shot` 安装。装完后如果输入框里没出现相机按钮，刷新一次页面即可。
+
+## 使用
+
+| 操作 | 效果 |
 |---|---|
-| `Ctrl+Alt+A` (global) | Region overlay → drag + Enter → shot in the last active conversation draft |
-| Camera button in composer | Same overlay and draft flow as the hotkey |
-| `/shot` | Region overlay → shot in the draft |
-| `/shot x,y,w,h` | Skips the overlay, captures that rectangle |
-| Agent `screenshot` tool | Model captures your screen when you ask it to look at your screen/window/dialog |
+| `Ctrl+Alt+A`（全局） | 覆盖层拖框 → 回车 → 截图进入最近活跃会话的草稿 |
+| 输入框相机按钮 | 与快捷键完全相同的覆盖层与草稿流程 |
+| `/shot` | 覆盖层拖框选区 |
+| `/shot x,y,w,h` | 跳过覆盖层，直接截取指定矩形 |
+| 智能体 `screenshot` 工具 | 你要求看屏幕/窗口/报错弹窗时由模型触发 |
 
-Hotkey actions available from the overlay: **session** (draft in conversation), **translate**, **OCR**, **copy** (clipboard only).
+覆盖层上可选动作：**入会话**（进输入框草稿）、**翻译**、**OCR**、**复制**（仅剪贴板）。
 
-## Configuration
+## 配置
 
-Set a custom hotkey through the profile patch (`cordis.patch.yml`):
+通过 profile 补丁（`cordis.patch.yml`）自定义快捷键：
 
 ```yaml
 - id: dsh-shot
   name: dsh-shot
   config:
-    hotkey: Ctrl+Alt+A   # any RegisterHotKey-style chord, e.g. Ctrl+Shift+S
+    hotkey: Ctrl+Alt+A   # 任意 RegisterHotKey 风格组合键，如 Ctrl+Shift+S
 ```
 
-## Privacy & security
+## 隐私与安全
 
-- Capture runs **entirely locally**: the PNG goes to your temp directory and into the conversation you choose. Nothing is uploaded by this plugin.
-- If the hotkey daemon exits unexpectedly it stays disabled until the plugin reloads (no silent auto-restart), and the reason is logged to the console.
+- 截图**完全在本地完成**：PNG 落在临时目录和你选择的会话里，本插件不向任何地方上传数据。
+- 快捷键守护进程意外退出后保持停用（不静默自动重启），原因会记录到控制台。
 
-## Troubleshooting
+## 常见问题
 
-- **Hotkey does nothing** — another app may own `Ctrl+Alt+A`. Change it via the config above, then reload the plugin.
-- **Antivirus blocks the overlay** — the overlay is PowerShell hosting in-process-compiled WinForms code; whitelist the `helper/*.ps1` scripts if your AV flags them.
-- **Camera button missing** — refresh the page; the client half registers into `conversation.input.left`.
+- **快捷键没反应** — 可能被其他应用占用，按上面的配置换成别的组合键后重载插件。
+- **杀软拦截覆盖层** — 覆盖层是 PowerShell 承载的进程内编译 WinForms 代码，如被拦截可将 `helper/*.ps1` 加入白名单。
+- **相机按钮不见了** — 刷新页面；客户端半区注册在 `conversation.input.left` 槽位。
 
-## Changelog
+## 更新日志
 
-See [CHANGELOG.md](CHANGELOG.md). Version `0.1.1` fixes web-boot failure on DSH `0.2.2-rc.1` (the client bundle now registers under its package name, matching the client-modules loader's row-id contract).
+见 [CHANGELOG.md](CHANGELOG.md)。`0.1.1` 修复了 DSH `0.2.2-rc.1` 上网页端启动失败的问题（client bundle 改为以包名注册，匹配 client-modules 加载器的 row-id 契约）。
 
-## License
+## 许可
 
 [MIT](LICENSE)
