@@ -1,0 +1,54 @@
+{
+  "name": "dsh-shot",
+  "version": "0.1.1",
+  "type": "module",
+  "homepage": "https://github.com/EasySSHCN/dsh-shot#readme",
+  "description": "Screenshot capture for DSH: region/window/screen capture with a full-screen overlay, feeding the image into the conversation.",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "screenshot",
+    "screen-capture",
+    "plugin",
+    "awesome-dsh-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EasySSHCN/dsh-shot.git"
+  },
+  "license": "MIT",
+  "author": "ZhenAn",
+  "engines": {
+    "dsh": ">=0.2.1"
+  },
+  "os": [
+    "win32"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "helper/*",
+    "!helper/test-send-hotkey.ps1",
+    "locale/*.json",
+    "icon.svg",
+    "LICENSE",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-ui-conversation"]
+    }
+  }
+}
